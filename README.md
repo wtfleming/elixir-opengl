@@ -1,4 +1,4 @@
-# ElixirOpengl
+# ElixirOpenGL
 
 Example of working with OpenGL from Elixir
 
