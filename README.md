@@ -2,6 +2,13 @@
 
 Example of working with OpenGL from Elixir
 
+
+Triangle Example:
+
+![alt tag](https://raw.github.com/wtfleming/elixir-opengl/master/readme-images/triangle.png)
+
+## Run the example
+
 Start iex:
 
 ```sh
@@ -15,9 +22,5 @@ iex(1)> gc = GameCore.start_link()
 iex(2)> GameCore.load(gc, Triangle)
 iex(3)> GameCore.unload(gc)
 ```
-
-Triangle:
-
-![alt tag](https://raw.github.com/wtfleming/elixir-opengl/master/readme-images/triangle.png)
 
 Adapted from Erlang code at https://github.com/asceth/nehe_erlang
