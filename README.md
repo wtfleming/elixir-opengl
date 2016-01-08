@@ -3,7 +3,7 @@
 Example of working with OpenGL from Elixir
 
 
-Triangle Example:
+Triangle:
 
 ![alt tag](https://raw.github.com/wtfleming/elixir-opengl/master/readme-images/triangle.png)
 
