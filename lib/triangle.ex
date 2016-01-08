@@ -1,44 +1,41 @@
-defmodule ElixirOpengl do
+defmodule Triangle do
   @behaviour :wx_object
   use Bitwise
-
-  @title 'Elixir OpenGL'
-  @size {600, 600}
 
   #######
   # API #
   #######
-  def start_link() do
-    :wx_object.start_link(__MODULE__, [], [])
+  def start(config) do
+    :wx_object.start_link(__MODULE__, config, [])
   end
 
   #################################
   # :wx_object behavior callbacks #
   #################################
   def init(config) do
-    wx = :wx.new(config)
-    frame = :wxFrame.new(wx, :wx_const.wx_id_any, @title, [{:size, @size}])
-    :wxWindow.connect(frame, :close_window)
-    :wxFrame.show(frame)
+    parent = :proplists.get_value(:parent, config)
+    size = :proplists.get_value(:size, config)
 
-    opts = [{:size, @size}]
+    opts = [{:size, size}]
     gl_attrib = [{:attribList, [:wx_const.wx_gl_rgba,
                                 :wx_const.wx_gl_doublebuffer,
                                 :wx_const.wx_gl_min_red, 8,
                                 :wx_const.wx_gl_min_green, 8,
                                 :wx_const.wx_gl_min_blue, 8,
                                 :wx_const.wx_gl_depth_size, 24, 0]}]
-    canvas = :wxGLCanvas.new(frame, opts ++ gl_attrib)
 
+    canvas = :wxGLCanvas.new(parent, opts ++ gl_attrib)
     :wxGLCanvas.connect(canvas, :size)
-    :wxWindow.reparent(canvas, frame)
+    :wxWindow.hide(parent)
+    :wxWindow.reparent(canvas, parent)
+    :wxWindow.show(parent)
     :wxGLCanvas.setCurrent(canvas)
     setup_gl(canvas)
 
     # Periodically send a message to trigger a redraw of the scene
     timer = :timer.send_interval(20, self(), :update)
 
-    {frame, %{canvas: canvas, timer: timer}}
+    {parent, %{canvas: canvas, timer: timer}}
   end
 
   def code_change(_, _, state) do
@@ -46,14 +43,12 @@ defmodule ElixirOpengl do
   end
 
   def handle_cast(msg, state) do
-    IO.puts "Cast:"
-    IO.inspect msg
+    :io.format("Cast: ~p~n", [msg])
     {:noreply, state}
   end
 
   def handle_call(msg, _from, state) do
-    IO.puts "Call:"
-    IO.inspect msg
+    :io.format("Call: ~p~n", [msg])
     {:reply, :ok, state}
   end
 
@@ -68,12 +63,6 @@ defmodule ElixirOpengl do
     {:noreply, state}
   end
 
-  # Example input:
-  # {:wx, -2006, {:wx_ref, 35, :wxFrame, []}, [], {:wxClose, :close_window}}
-  def handle_event({:wx, _, _, _, {:wxClose, :close_window}}, state) do
-    {:stop, :normal, state}
-  end
-
   def handle_event({:wx, _, _, _, {:wxSize, :size, {width, height}, _}}, state) do
     if width != 0 and height != 0 do
       resize_gl_scene(width, height)
@@ -82,8 +71,8 @@ defmodule ElixirOpengl do
   end
 
   def terminate(_reason, state) do
-    :wxGLCanvas.destroy(state.canvas)
     :timer.cancel(state.timer)
+    :wxGLCanvas.destroy(state.canvas)
     :timer.sleep(300)
   end
 
@@ -131,3 +120,4 @@ defmodule ElixirOpengl do
     :ok
   end
 end
+
